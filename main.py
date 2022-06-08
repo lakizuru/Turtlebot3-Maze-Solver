@@ -142,13 +142,12 @@ def MAIN():
             else:
                 SECTION = 2
                 STATE = 0
-            
             print("Maze Solved Successfully!")
             print("Looking for Door 1")
             if(math.isinf(Left) and math.isinf(Right)):
                 DOOR1 = DOOR1 + 1
                 print("Door 1 detected")
-            if(DOOR1 > 0):
+            if(DOOR1 > 1):
                 DOOR1 = 1
                 print("Door 1 is open")
             print("Moving towards Cylinder")
@@ -159,26 +158,16 @@ def MAIN():
             elif(STATE == 1):
                 GO(DES_POS2)
             else:
-                SECTION = 3
+                SECTION = 4
                 STATE = 0
             print("Looking for Door 2")
             if(math.isinf(Left) and math.isinf(Right)):
                 DOOR2 = DOOR2 + 1
                 print("Door 2 detected")
-            if(DOOR2 > 0):
-                DOOR1 = 2
+            if(DOOR2 > 1):
+                DOOR2 = 1
                 print("Door 2 is open")
             print("Moving towards Cylinder")
-            
-        # Wall Following Part 
-        elif(SECTION == 3):
-            if(STATE == 0):
-                FIX_YAW(DES_POS3)
-            elif(STATE == 1):
-                GO(DES_POS3)
-            else:
-                SECTION = 4
-
             print("Total Door count: " + str(DOOR1 + DOOR2))
 
         # Cylinder Following Part
@@ -225,6 +214,10 @@ def MAIN():
                         print("Range: {:.2f}m - Wall-following; turn right.".format(FRight))
                         command.angular.z = +0.8
                         command.linear.x = 0.22
+                elif (Front <= distance and FLeft < Front):
+                	print("Rotating right")
+                	command.angular.z = -0.5
+                	command.linear.x = 0.0
                 else:
                     print("Front obstacle detected. Turning away.")
                     command.angular.z = +1.0
