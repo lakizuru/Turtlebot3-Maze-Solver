@@ -27,13 +27,13 @@ DIST_PRE = 0.3
 # Door 1
 DES_POS1 = Point()
 DES_POS1.x = 3
-DES_POS1.y = 3
+DES_POS1.y = 3.5
 DES_POS1.z = 0
 
 #Door 2
 DES_POS2 = Point()
 DES_POS2.x = 3.0
-DES_POS2.y = 4
+DES_POS2.y = 4.5
 DES_POS2.z = 0
 
 # Cylinder Front
@@ -133,8 +133,10 @@ def MAIN():
     time.sleep(2)
 
     while not rospy.is_shutdown():
-        # Maze Solving Part
+
         if(SECTION == 1):
+            print("Maze Solved Successfully!")
+            print("Looking for Door 1")
             if(STATE == 0):
                 FIX_YAW(DES_POS1)
             elif(STATE == 1):
@@ -142,17 +144,16 @@ def MAIN():
             else:
                 SECTION = 2
                 STATE = 0
-            print("Maze Solved Successfully!")
-            print("Looking for Door 1")
+            
             if(math.isinf(Left) and math.isinf(Right)):
                 DOOR1 = DOOR1 + 1
                 print("Door 1 detected")
             if(DOOR1 > 1):
                 DOOR1 = 1
-                print("Door 1 is open")
-            print("Moving towards Cylinder")
+                print("Door 1 is open")            
              
         elif(SECTION == 2):
+            print("Looking for Door 2")
             if(STATE == 0):
                 FIX_YAW(DES_POS2)
             elif(STATE == 1):
@@ -160,35 +161,45 @@ def MAIN():
             else:
                 SECTION = 4
                 STATE = 0
-            print("Looking for Door 2")
+
             if(math.isinf(Left) and math.isinf(Right)):
                 DOOR2 = DOOR2 + 1
                 print("Door 2 detected")
             if(DOOR2 > 1):
                 DOOR2 = 1
                 print("Door 2 is open")
-            print("Moving towards Cylinder")
-            print("Total Door count: " + str(DOOR1 + DOOR2))
 
         # Cylinder Following Part
         elif(SECTION == 4):
-            print("section4")
-            if (DOOR1 + DOOR2 == 1):
-                print("Clockwise")
-            elif (DOOR1 + DOOR2 == 2):
-                print("Counter-clockwise")
+            print("Moving towards Cylinder")
+            print("Total Door count: " + str(DOOR1 + DOOR2))
+
+            if(STATE == 0):
+                FIX_YAW(DES_POS2)
+            elif(STATE == 1):
+                GO(DES_POS2)
             else:
-                print("Error detecting doors")
-            	
-            ROTATION_ANGLE = ODOM_ROTATION(0,0.6)
-            command.angular.z = ROTATION_ANGLE
-            command.linear.x = 0
-            CMD_PUB.publish(command)
-            if(math.fabs(ROTATION_ANGLE) < YAW_PREC):
-                SECTION = 5
+                if (DOOR1 + DOOR2 == 1):
+                    print("Clockwise")
+                elif (DOOR1 + DOOR2 == 2):
+                    print("Counter-clockwise")
+                else:
+                    print("Error detecting doors")
+
                 done_moving()
 
+            
+            	
+            # ROTATION_ANGLE = ODOM_ROTATION(0,0.6)
+            # command.angular.z = ROTATION_ANGLE
+            # command.linear.x = 0
+            # CMD_PUB.publish(command)
+            # if(math.fabs(ROTATION_ANGLE) < YAW_PREC):
+            #     SECTION = 5
+            #     done_moving()
+
         else:
+            # Maze Solving Part
             while(near_wall == 0 and not rospy.is_shutdown()): #wall following 
                 if(Front > distance and FRight > distance and FLeft > distance):
                     command.angular.z = -0.1
