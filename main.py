@@ -33,7 +33,7 @@ DES_POS1.z = 0
 #Door 2
 DES_POS2 = Point()
 DES_POS2.x = 3.0
-DES_POS2.y = 4.5
+DES_POS2.y = 4.3
 DES_POS2.z = 0
 
 # Cylinder Front
@@ -159,7 +159,7 @@ def MAIN():
             elif(STATE == 1):
                 GO(DES_POS2)
             else:
-                SECTION = 4
+                SECTION = 3
                 STATE = 0
 
             if(math.isinf(Left) and math.isinf(Right)):
@@ -170,14 +170,14 @@ def MAIN():
                 print("Door 2 is open")
 
         # Cylinder Following Part
-        elif(SECTION == 4):
+        elif(SECTION == 3):
             print("Moving towards Cylinder")
             print("Total Door count: " + str(DOOR1 + DOOR2))
 
             if(STATE == 0):
-                FIX_YAW(DES_POS2)
+                FIX_YAW(DES_POS3)
             elif(STATE == 1):
-                GO(DES_POS2)
+                GO(DES_POS3)
             else:
                 if (DOOR1 + DOOR2 == 1):
                     print("Clockwise")
