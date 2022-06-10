@@ -36,11 +36,23 @@ DES_POS2.x = 3.0
 DES_POS2.y = 4.3
 DES_POS2.z = 0
 
-# Cylinder Front
+# Cylinder Front Clockwise
 DES_POS3 = Point()
-DES_POS3.x = 3
-DES_POS3.y = 5
+DES_POS3.x = 2.75
+DES_POS3.y = 5.5
 DES_POS3.z = 0
+
+# Cylinder Front Counterclockwoise
+DES_POS4 = Point()
+DES_POS4.x = 3.25
+DES_POS4.y = 5.5
+DES_POS4.z = 0
+
+# Cylinder Front 
+DES_POS5 = Point()
+DES_POS5.x = 3
+DES_POS5.y = 4.7
+DES_POS5.z = 0
 
 STATE = 0
 SECTION = 0
@@ -89,6 +101,14 @@ def ODOM_ROTATION(des_angle_in_radian,kp):
     err_yaw = NORMALIZE_ANGLE(des_angle_in_radian - ROBOT_YAW)
     return kp * err_yaw
 
+def shallStop(des_pos):
+    global CMD_PUB
+    err_pos = math.sqrt(pow(des_pos.y - ROBOT_POS.y, 2) + pow(des_pos.x - ROBOT_POS.x, 2))
+    if err_pos < 0.15:
+        command = Twist()
+        command.linear.x = 0
+        command.angular.z = 0
+        CMD_PUB.publish(command)
 
 def GO(des_pos):
     global ROBOT_YAW, CMD_PUB, YAW_PREC, DIST_PRE
@@ -169,34 +189,84 @@ def MAIN():
                 DOOR2 = 1
                 print("Door 2 is open")
 
-        # Cylinder Following Part
         elif(SECTION == 3):
             print("Moving towards Cylinder")
-            print("Total Door count: " + str(DOOR1 + DOOR2))
-
             if(STATE == 0):
-                FIX_YAW(DES_POS3)
-            elif(STATE == 1):
-                GO(DES_POS3)
-            else:
                 if (DOOR1 + DOOR2 == 1):
-                    print("Clockwise")
+                    FIX_YAW(DES_POS3)
                 elif (DOOR1 + DOOR2 == 2):
-                    print("Counter-clockwise")
-                else:
-                    print("Error detecting doors")
+                    FIX_YAW(DES_POS4)
+            elif(STATE == 1):
+                if (DOOR1 + DOOR2 == 1):
+                    GO(DES_POS3)
+                elif (DOOR1 + DOOR2 == 2):
+                    GO(DES_POS4)
+            else:
+                SECTION = 4
+                STATE = 0
 
+        # Cylinder Following Part
+        elif(SECTION == 4):
+            print("Rotating around Cylinder")
+            print("Total Door count: " + str(DOOR1 + DOOR2))
+            if (DOOR1 + DOOR2 == 1):
+                print("Clockwise")
+
+                if(Front > distance):
+                    if(FRight < (distance / 2)):
+                        print("Range: {:.2f}m - Too close. Backing up.".format(FRight))
+                        command.angular.z = +0.5
+                        command.linear.x = 0.25
+                    elif(FRight >= (distance /2 )):
+                        print("Range: {:.2f}m - Cylinder-rotation; turn right.".format(FRight))
+                        command.angular.z = -0.5
+                        command.linear.x = 0.25
+                    else:
+                        print("Range: {:.2f}m - Cylinder-rotation; turn left.".format(FRight))
+                        command.angular.z = +0.5
+                        command.linear.x = 0.25
+                else:
+                    print("Front obstacle detected. Turning away.")
+                    command.angular.z = +1.0
+                    command.linear.x = 0.0
+                    CMD_PUB.publish(command)
+                    while(Front < 0.3 and not rospy.is_shutdown()):
+                        CMD_PUB.publish(command)
+                CMD_PUB.publish(command)
+
+            elif (DOOR1 + DOOR2 == 2):
+                print("Counter-clockwise")
+
+                if(Front > distance):
+                    if(FLeft < (distance / 2)):
+                        print("Range: {:.2f}m - Too close. Backing up.".format(FRight))
+                        command.angular.z = -0.5
+                        command.linear.x = 0.25
+                    elif(FLeft >= (distance /2 )):
+                        print("Range: {:.2f}m - Cylinder rotation; turn left.".format(FRight))
+                        command.angular.z = +0.5
+                        command.linear.x = 0.25
+                    else:
+                        print("Range: {:.2f}m - Cylinder rotation; turn right.".format(FRight))
+                        command.angular.z = -0.5
+                        command.linear.x = 0.25
+                else:
+                    print("Front obstacle detected. Turning away.")
+                    command.angular.z = -1.0
+                    command.linear.x = 0.0
+                    CMD_PUB.publish(command)
+                    while(Front < 0.3 and not rospy.is_shutdown()):
+                        CMD_PUB.publish(command)
+                CMD_PUB.publish(command)
+                
+            else:
+                print("Error detecting doors")
                 done_moving()
 
-            
-            	
-            # ROTATION_ANGLE = ODOM_ROTATION(0,0.6)
-            # command.angular.z = ROTATION_ANGLE
-            # command.linear.x = 0
-            # CMD_PUB.publish(command)
-            # if(math.fabs(ROTATION_ANGLE) < YAW_PREC):
-            #     SECTION = 5
-            #     done_moving()
+            if (DOOR1 + DOOR2 == 1):
+                shallStop(DES_POS4)
+            elif (DOOR1 + DOOR2 == 2):
+                shallStop(DES_POS3)
 
         else:
             # Maze Solving Part
