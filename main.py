@@ -219,12 +219,12 @@ def MAIN():
                         command.linear.x = 0.25
                     elif(FRight >= (distance /2 )):
                         print("Range: {:.2f}m - Cylinder-rotation; turn right.".format(FRight))
-                        command.angular.z = -0.5
-                        command.linear.x = 0.25
+                        command.angular.z = -0.4
+                        command.linear.x = 0.3
                     else:
                         print("Range: {:.2f}m - Cylinder-rotation; turn left.".format(FRight))
-                        command.angular.z = +0.5
-                        command.linear.x = 0.25
+                        command.angular.z = +0.4
+                        command.linear.x = 0.3
                 else:
                     print("Front obstacle detected. Turning away.")
                     command.angular.z = +1.0
@@ -244,12 +244,12 @@ def MAIN():
                         command.linear.x = 0.25
                     elif(FLeft >= (distance /2 )):
                         print("Range: {:.2f}m - Cylinder rotation; turn left.".format(FRight))
-                        command.angular.z = +0.5
-                        command.linear.x = 0.25
+                        command.angular.z = +0.4
+                        command.linear.x = 0.3
                     else:
                         print("Range: {:.2f}m - Cylinder rotation; turn right.".format(FRight))
-                        command.angular.z = -0.5
-                        command.linear.x = 0.25
+                        command.angular.z = -0.4
+                        command.linear.x = 0.3
                 else:
                     print("Front obstacle detected. Turning away.")
                     command.angular.z = -1.0
@@ -295,7 +295,7 @@ def MAIN():
                         print("Range: {:.2f}m - Wall-following; turn right.".format(FRight))
                         command.angular.z = +0.8
                         command.linear.x = 0.22
-                elif (Front <= distance and FLeft < Front):
+                elif (Front <= distance  and FLeft < Front):
                 	print("Rotating right")
                 	command.angular.z = -0.5
                 	command.linear.x = 0.0
